@@ -18,7 +18,7 @@ namespace Project1
 				processor = value;
 			}
 		}
-		// Hey
+		
         public void ShowMenu()
         {
 			
