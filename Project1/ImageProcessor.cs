@@ -99,5 +99,51 @@ namespace Project1
 
             base.Draw(gameTime);
         }
-    }
+
+
+
+		//Image Transformation Methods
+		void Resizer(int width, int height)
+		{
+			Texture2D alterImg = new Texture2D(GraphicsDevice, width, height);
+			int[] oldImgColor = new int[image.Width * image.Height * 3];
+			image.GetData<Color>()
+
+		}
+
+		void Contraster()
+		{
+
+		}
+
+		void Brightener()
+		{
+
+		}
+
+		void Saturator()
+		{
+
+		}
+
+		void Blurrer()
+		{
+
+		}
+
+		void Sharpener()
+		{
+
+		}
+
+		void EdgeDetector()
+		{
+
+		}
+
+		void Saver()
+		{
+
+		}
+	}
 }
