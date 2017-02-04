@@ -105,27 +105,48 @@ namespace Project1
 		{
 			//These 4 variables are the 4 pixels around the column/row specified. Floor is used to round down (get the left/upper pixels) and Ceiling is used to round up (get the right/lower pixels)
 			//In the case of receiving 5.2,8.4 , c1r1 will be pixel 5,8 , c1r2 will be 5,9 , c2r1 will be 6,8 , c2r2 will be 6,9
-			int c1r1 = (int)((Math.Floor(col)) + (Math.Floor(row) * width * 3));
-			int c1r2 = (int)((Math.Floor(col)) + (Math.Ceiling(row) * width * 3));
-			int c2r1 = (int)((Math.Ceiling(col)) + (Math.Floor(row) * width * 3));
-			int c2r2 = (int)((Math.Ceiling(col)) + (Math.Ceiling(row) * width * 3));
+			int c1r1 = (int)((Math.Floor(col)) + (Math.Floor(row) * width));
+			int c1r2 = (int)((Math.Floor(col)) + (Math.Ceiling(row) * width));
+			int c2r1 = (int)((Math.Ceiling(col)) + (Math.Floor(row) * width));
+			int c2r2 = (int)((Math.Ceiling(col)) + (Math.Ceiling(row) * width));
+
+			//The addition of these shortcuts to each of the 4 pixels surrounding the desired location in the oldImgColor array also allows checking
+			//to ensure that none of them reference a value outside of bounds of the oldImgColor array (in accordance with the dimensions of the texture image).
+			Color c1r1Color, c1r2Color, c2r1Color, c2r2Color;
+
+			c1r1Color = oldImgColor[c1r1];
+			c1r2Color = oldImgColor[c1r2];
+			c2r1Color = oldImgColor[c2r1];
+			c2r2Color = oldImgColor[c2r2];
+
+			if (col > image.Width)
+			{
+				c2r1Color = oldImgColor[c1r1];
+				c2r2Color = oldImgColor[c1r2];
+			}
+			if(row > image.Height)
+			{
+				c1r2Color = oldImgColor[c1r1];
+				c2r2Color = oldImgColor[c2r1];
+			}
 
 			//For color values A,R,G,B, takes avg of left side pixels weighted by rowRatio, then does the same for the right side, then averages the left and right weighted by colRatio
-			double leftAvg = ((oldImgColor[c1r1].A * (1 - (rowRatio % 1))) + (oldImgColor[c1r2].A * (rowRatio % 1))) / 2;
-			double rightAvg = (oldImgColor[c2r1].A * (1 - (rowRatio % 1)) + oldImgColor[c2r2].A * (rowRatio % 1)) / 2;
+			double leftAvg = ((c1r1Color.A * (1 - (rowRatio % 1))) + (c1r2Color.A * (rowRatio % 1))) / 2;
+			double rightAvg = (c2r1Color.A * (1 - (rowRatio % 1)) + c2r2Color.A * (rowRatio % 1)) / 2;
 			double totalAvgA = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
 
-			leftAvg = ((oldImgColor[c1r1].B*(1-(rowRatio%1))) + (oldImgColor[c1r2].B * (rowRatio % 1))) / 2;
-			rightAvg = (oldImgColor[c2r1].B * (1 - (rowRatio % 1)) + oldImgColor[c2r2].B * (rowRatio % 1)) / 2;
+			leftAvg = ((c1r1Color.B*(1-(rowRatio%1))) + (c1r2Color.B * (rowRatio % 1))) / 2;
+			rightAvg = (c2r1Color.B * (1 - (rowRatio % 1)) + c2r2Color.B * (rowRatio % 1)) / 2;
 			double totalAvgB = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
 
-			leftAvg = ((oldImgColor[c1r1].G * (1 - (rowRatio % 1))) + (oldImgColor[c1r2].G * (rowRatio % 1))) / 2;
-			rightAvg = (oldImgColor[c2r1].G * (1 - (rowRatio % 1)) + oldImgColor[c2r2].G * (rowRatio % 1)) / 2;
+			leftAvg = ((c1r1Color.G * (1 - (rowRatio % 1))) + (c1r2Color.G * (rowRatio % 1))) / 2;
+			rightAvg = (c2r1Color.G * (1 - (rowRatio % 1)) + c2r2Color.G * (rowRatio % 1)) / 2;
 			double totalAvgG = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
 
-			leftAvg = ((oldImgColor[c1r1].R * (1 - (rowRatio % 1))) + (oldImgColor[c1r2].R * (rowRatio % 1))) / 2;
-			rightAvg = (oldImgColor[c2r1].R * (1 - (rowRatio % 1)) + oldImgColor[c2r2].R * (rowRatio % 1)) / 2;
+			leftAvg = ((c1r1Color.R * (1 - (rowRatio % 1))) + (c1r2Color.R * (rowRatio % 1))) / 2;
+			rightAvg = (c2r1Color.R * (1 - (rowRatio % 1)) + c2r2Color.R * (rowRatio % 1)) / 2;
 			double totalAvgR = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
+			
 
 			Color newColor = new Color();
 			newColor.A = (byte)Math.Round(totalAvgA);
