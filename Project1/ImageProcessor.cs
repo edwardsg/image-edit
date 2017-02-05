@@ -188,10 +188,16 @@ namespace Project1
 			for(int i=0; i<image.Width*image.Height; i++)
 			{
 				double newValue = (oldImgColor[i].B * contrast) - (contrast * -128 + 128);
+				if (newValue < 0) newValue = 0;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].B = (byte)newValue;
 				newValue = (oldImgColor[i].G * contrast) - (contrast * -128 + 128);
+				if (newValue < 0) newValue = 0;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].G = (byte)newValue;
 				newValue = (oldImgColor[i].R * contrast) - (contrast * -128 + 128);
+				if (newValue < 0) newValue = 0;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].R = (byte)newValue;
 			}
 
@@ -206,10 +212,13 @@ namespace Project1
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
 				double newValue = oldImgColor[i].B * brightness;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].B = (byte)newValue;
 				newValue = oldImgColor[i].G * brightness;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].G = (byte)newValue;
 				newValue = oldImgColor[i].R * brightness;
+				if (newValue > 255) newValue = 255;
 				oldImgColor[i].R = (byte)newValue;
 			}
 
