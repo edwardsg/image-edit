@@ -176,8 +176,8 @@ namespace Project1
 				}
 			}
 
-
 			newImage.SetData<Color>(newImgColor);
+			replacement = newImage;
 		}
 
 		void Contraster()
