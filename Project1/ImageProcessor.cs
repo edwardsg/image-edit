@@ -180,13 +180,40 @@ namespace Project1
 			replacement = newImage;
 		}
 
-		void Contraster()
+		void Contraster(double contrast)
 		{
+			Color[] oldImgColor = new Color[image.Width * image.Height];    //So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
+			image.GetData<Color>(oldImgColor);                                  //A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
 
+			for(int i=0; i<image.Width*image.Height; i++)
+			{
+				double newValue = (oldImgColor[i].B * contrast) - (contrast * -128 + 128);
+				oldImgColor[i].B = (byte)newValue;
+				newValue = (oldImgColor[i].G * contrast) - (contrast * -128 + 128);
+				oldImgColor[i].G = (byte)newValue;
+				newValue = (oldImgColor[i].R * contrast) - (contrast * -128 + 128);
+				oldImgColor[i].R = (byte)newValue;
+			}
+
+			replacement.SetData<Color>(oldImgColor);
 		}
 
-		void Brightener()
+		void Brightener(double brightness)
 		{
+			Color[] oldImgColor = new Color[image.Width * image.Height];    //So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
+			image.GetData<Color>(oldImgColor);                                  //A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
+
+			for (int i = 0; i < image.Width * image.Height; i++)
+			{
+				double newValue = oldImgColor[i].B * brightness;
+				oldImgColor[i].B = (byte)newValue;
+				newValue = oldImgColor[i].G * brightness;
+				oldImgColor[i].G = (byte)newValue;
+				newValue = oldImgColor[i].R * brightness;
+				oldImgColor[i].R = (byte)newValue;
+			}
+
+			replacement.SetData<Color>(oldImgColor);
 
 		}
 

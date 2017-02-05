@@ -50,6 +50,8 @@ namespace Project1
 					Console.Write("Enter new height: ");
 					int height = int.Parse(Console.ReadLine());
 
+					ImageProcessor.Resizer(width, height);
+
 					Console.WriteLine("Resize succeeded.");
 				}
 
@@ -57,10 +59,18 @@ namespace Project1
 
 				if (command.Equals("2"))
 				{
-					Console.Write("Enter contrast change: ");
-					int contrast = int.Parse(Console.ReadLine());
+					double contrast = 3;
+					while (contrast < 0 || contrast > 2)
+					{
+						Console.Write("Enter contrast change: ");
+						contrast = double.Parse(Console.ReadLine());
+						if (contrast < 0 || contrast > 2)
+						{
+							Console.WriteLine("Invalid input. Please input a contrast between 0 and 2");
+						}
+					}
 
-
+					ImageProcessor.Contraster(contrast);
 
 					Console.WriteLine("Contrast succeeded.");
 				}
