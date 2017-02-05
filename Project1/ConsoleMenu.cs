@@ -55,8 +55,6 @@ namespace Project1
 					Console.WriteLine("Resize succeeded.");
 				}
 
-
-
 				if (command.Equals("2"))
 				{
 					double contrast = 3;
@@ -74,24 +72,35 @@ namespace Project1
 
 					Console.WriteLine("Contrast succeeded.");
 				}
+
 				if (command.Equals("3"))
 				{
 					Console.Write("Enter brightness change: ");
-					int brightness = int.Parse(Console.ReadLine());
+					double brightness = double.Parse(Console.ReadLine());
 
 
 
 					Console.WriteLine("Brightness succeeded.");
 				}
+
 				if (command.Equals("4"))
 				{
-					Console.Write("Enter saturation change: ");
-					int saturation = int.Parse(Console.ReadLine());
+					double brightness = 3;
+					while (brightness < 0 || brightness > 2)
+					{
+						Console.Write("Enter contrast change: ");
+						brightness = double.Parse(Console.ReadLine());
+						if (brightness < 0 || brightness > 2)
+						{
+							Console.WriteLine("Invalid input. Please input a brightness between 0 and 2");
+						}
+					}
 
-
+					ImageProcessor.Brightener(brightness);
 
 					Console.WriteLine("Saturation succeeded.");
 				}
+
 				if (command.Equals("5"))
 				{
 
@@ -99,6 +108,7 @@ namespace Project1
 
 					Console.WriteLine("Blur succeeded.");
 				}
+
 				if (command.Equals("6"))
 				{
 
@@ -106,6 +116,7 @@ namespace Project1
 
 					Console.WriteLine("Sharpen succeeded.");
 				}
+
 				if (command.Equals("7"))
 				{
 
@@ -113,6 +124,7 @@ namespace Project1
 
 					Console.WriteLine("Edge Detection succeeded.");
 				}
+
 				if (command.Equals("8"))
 				{
 					Console.Write("Enter file name: ");
@@ -122,6 +134,7 @@ namespace Project1
 
 					Console.WriteLine("Saving file succeeded.");
 				}
+
 				if (command.Equals("9"))
 				{
 
