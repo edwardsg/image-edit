@@ -138,30 +138,19 @@ namespace Project1
 			}
 
 			//For color values A,R,G,B, takes avg of left side pixels weighted by rowRatio, then does the same for the right side, then averages the left and right weighted by colRatio
-			double leftAvg = ((c1r1Color.A * (1 - (rowRatio % 1))) + (c1r2Color.A * (rowRatio % 1))) / 2;
-			double rightAvg = (c2r1Color.A * (1 - (rowRatio % 1)) + c2r2Color.A * (rowRatio % 1)) / 2;
-			double totalAvgA = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
-
-			leftAvg = ((c1r1Color.B*(1-(rowRatio%1))) + (c1r2Color.B * (rowRatio % 1))) / 2;
-			rightAvg = (c2r1Color.B * (1 - (rowRatio % 1)) + c2r2Color.B * (rowRatio % 1)) / 2;
-			double totalAvgB = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
+			double leftAvg = ((c1r1Color.B*(1-(rowRatio%1))) + (c1r2Color.B * (rowRatio % 1))) / 2;
+			double rightAvg = (c2r1Color.B * (1 - (rowRatio % 1)) + c2r2Color.B * (rowRatio % 1)) / 2;
+			int totalAvgB = (int) Math.Round((leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2);
 
 			leftAvg = ((c1r1Color.G * (1 - (rowRatio % 1))) + (c1r2Color.G * (rowRatio % 1))) / 2;
 			rightAvg = (c2r1Color.G * (1 - (rowRatio % 1)) + c2r2Color.G * (rowRatio % 1)) / 2;
-			double totalAvgG = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
+			int totalAvgG = (int) Math.Round((leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2);
 
 			leftAvg = ((c1r1Color.R * (1 - (rowRatio % 1))) + (c1r2Color.R * (rowRatio % 1))) / 2;
 			rightAvg = (c2r1Color.R * (1 - (rowRatio % 1)) + c2r2Color.R * (rowRatio % 1)) / 2;
-			double totalAvgR = (leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2;
-			
+			int totalAvgR = (int) Math.Round((leftAvg * (1 - (colRatio % 1)) + rightAvg * (colRatio % 1)) / 2);
 
-			Color newColor = new Color();
-			newColor.A = (byte)Math.Round(totalAvgA);
-			newColor.B = (byte)Math.Round(totalAvgB);
-			newColor.G = (byte)Math.Round(totalAvgG);
-			newColor.R = (byte)Math.Round(totalAvgR);
-
-			return newColor;
+			return new Color(totalAvgR, totalAvgG, totalAvgB);
 		}
 
 		//Image Transformation Methods
@@ -185,6 +174,17 @@ namespace Project1
 
 			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
+
+			graphics.PreferredBackBufferWidth = width;
+			graphics.PreferredBackBufferHeight = height;
+			graphics.ApplyChanges();
+		}
+
+		int clamp(int value)
+		{
+			if (value < 0) return 0;
+			else if (value > 255) return 255;
+			else return value;
 		}
 
 		public void Contrast(double contrast)
@@ -195,23 +195,15 @@ namespace Project1
 			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
 			Color[] newImgColor = new Color[image.Width * image.Height];
 
-			for (int i=0; i<image.Width*image.Height; i++)
+			for (int i = 0; i < image.Width * image.Height; i++)
 			{
-				double newValue = (oldImgColor[i].B * contrast) - (contrast * -128 + 128);
-				if (newValue < 0) newValue = 0;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].B = (byte)newValue;
-				newValue = (oldImgColor[i].G * contrast) - (contrast * -128 + 128);
-				if (newValue < 0) newValue = 0;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].G = (byte)newValue;
-				newValue = (oldImgColor[i].R * contrast) - (contrast * -128 + 128);
-				if (newValue < 0) newValue = 0;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].R = (byte)newValue;
+				int r = clamp((int) (oldImgColor[i].R * contrast + contrast * -128 + 128));
+				int g = clamp((int) (oldImgColor[i].G * contrast + contrast * -128 + 128));
+				int b = clamp((int) (oldImgColor[i].B * contrast + contrast * -128 + 128));
+				newImgColor[i] = new Color(r, g, b);
 			}
 
-			newImage.SetData<Color>(oldImgColor);
+			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
 		}
 
@@ -225,18 +217,13 @@ namespace Project1
 
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
-				double newValue = oldImgColor[i].B * brightness;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].B = (byte)newValue;
-				newValue = oldImgColor[i].G * brightness;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].G = (byte)newValue;
-				newValue = oldImgColor[i].R * brightness;
-				if (newValue > 255) newValue = 255;
-				newImgColor[i].R = (byte)newValue;
+				int r = clamp((int) (oldImgColor[i].R * brightness));
+				int g = clamp((int) (oldImgColor[i].G * brightness));
+				int b = clamp((int) (oldImgColor[i].B * brightness));
+				newImgColor[i] = new Color(r, g, b);
 			}
 
-			newImage.SetData<Color>(oldImgColor);
+			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
 
 		}

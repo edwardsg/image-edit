@@ -73,18 +73,16 @@ namespace Project1
 
 				if (command.Equals("3"))
 				{
-					Console.Write("Enter brightness change: ");
-
 					double brightness;
 					do
 					{
 						Console.Write("Enter brightness change: ");
 						brightness = double.Parse(Console.ReadLine());
-						if (brightness < 0 || brightness > 2)
+						if (brightness < 0)
 						{
-							Console.WriteLine("Invalid input. Please input a brightness between 0 and 2");
+							Console.WriteLine("Invalid input. Please input a brightness greater than 0");
 						}
-					} while (brightness < 0 || brightness > 2);
+					} while (brightness < 0);
 
 						processor.Brighten(brightness);
 
