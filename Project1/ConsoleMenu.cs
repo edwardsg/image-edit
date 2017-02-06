@@ -50,7 +50,7 @@ namespace Project1
 					Console.Write("Enter new height: ");
 					int height = int.Parse(Console.ReadLine());
 
-					ImageProcessor.Resizer(width, height);
+					processor.Resize(width, height);
 
 					Console.WriteLine("Resize succeeded.");
 				}
@@ -68,7 +68,7 @@ namespace Project1
 						}
 					}
 
-					ImageProcessor.Contraster(contrast);
+					processor.Contrast(contrast);
 
 					Console.WriteLine("Contrast succeeded.");
 				}
@@ -96,7 +96,7 @@ namespace Project1
 						}
 					}
 
-					ImageProcessor.Brightener(brightness);
+					processor.Brighten(brightness);
 
 					Console.WriteLine("Saturation succeeded.");
 				}

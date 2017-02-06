@@ -158,7 +158,7 @@ namespace Project1
 		}
 
 		//Image Transformation Methods
-		void Resizer(int width, int height)
+		public void Resize(int width, int height)
 		{
 			Color[] oldImgColor = new Color[image.Width * image.Height];	//So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
 			image.GetData<Color>(oldImgColor);									//A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
@@ -180,7 +180,7 @@ namespace Project1
 			replacement = newImage;
 		}
 
-		void Contraster(double contrast)
+		public void Contrast(double contrast)
 		{
 			Color[] oldImgColor = new Color[image.Width * image.Height];    //So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
 			image.GetData<Color>(oldImgColor);                                  //A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
@@ -204,7 +204,7 @@ namespace Project1
 			replacement.SetData<Color>(oldImgColor);
 		}
 
-		void Brightener(double brightness)
+		public void Brighten(double brightness)
 		{
 			Color[] oldImgColor = new Color[image.Width * image.Height];    //So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
 			image.GetData<Color>(oldImgColor);                                  //A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
@@ -226,27 +226,27 @@ namespace Project1
 
 		}
 
-		void Saturator()
+		public void Saturate()
 		{
 
 		}
 
-		void Blurrer()
+		public void Blur()
 		{
 
 		}
 
-		void Sharpener()
+		public void Sharpen()
 		{
 
 		}
 
-		void EdgeDetector()
+		public void DetectEdge()
 		{
 
 		}
 
-		void Saver()
+		public void Save()
 		{
 
 		}
