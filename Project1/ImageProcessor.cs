@@ -213,20 +213,24 @@ namespace Project1
 			Color[] oldImgColor = new Color[image.Width * image.Height];    //So we have 2D image, but GetData and SetDate are 1D arrays. Will have to account for that in the loops somehow
 			image.GetData<Color>(oldImgColor);                                  //A 200x400 image will be 600x1200 in data, and thus moving to a "new row" would be adding 100 and reverting to "zero"
 
+			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
+			Color[] newImgColor = new Color[image.Width * image.Height];
+
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
 				double newValue = oldImgColor[i].B * brightness;
 				if (newValue > 255) newValue = 255;
-				oldImgColor[i].B = (byte)newValue;
+				newImgColor[i].B = (byte)newValue;
 				newValue = oldImgColor[i].G * brightness;
 				if (newValue > 255) newValue = 255;
-				oldImgColor[i].G = (byte)newValue;
+				newImgColor[i].G = (byte)newValue;
 				newValue = oldImgColor[i].R * brightness;
 				if (newValue > 255) newValue = 255;
-				oldImgColor[i].R = (byte)newValue;
+				newImgColor[i].R = (byte)newValue;
 			}
 
-			replacement.SetData<Color>(oldImgColor);
+			newImage.SetData<Color>(oldImgColor);
+			replacement = newImage;
 
 		}
 
