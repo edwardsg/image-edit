@@ -80,6 +80,13 @@ namespace Project1
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+			if (replacement != null)
+			{
+				image.Dispose();
+				image = replacement;
+				replacement = null;
+			}
+
             base.Update(gameTime);
         }
 

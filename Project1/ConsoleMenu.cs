@@ -21,8 +21,6 @@ namespace Project1
 		
         public void ShowMenu()
         {
-			
-
 			string command = "";
 
 			while (!command.Equals("9"))
@@ -76,27 +74,26 @@ namespace Project1
 				if (command.Equals("3"))
 				{
 					Console.Write("Enter brightness change: ");
-					double brightness = double.Parse(Console.ReadLine());
 
+					double brightness;
+					do
+					{
+						Console.Write("Enter brightness change: ");
+						brightness = double.Parse(Console.ReadLine());
+						if (brightness < 0 || brightness > 2)
+						{
+							Console.WriteLine("Invalid input. Please input a brightness between 0 and 2");
+						}
+					} while (brightness < 0 || brightness > 2);
 
+						processor.Brighten(brightness);
 
 					Console.WriteLine("Brightness succeeded.");
 				}
 
 				if (command.Equals("4"))
 				{
-					double brightness = 3;
-					while (brightness < 0 || brightness > 2)
-					{
-						Console.Write("Enter contrast change: ");
-						brightness = double.Parse(Console.ReadLine());
-						if (brightness < 0 || brightness > 2)
-						{
-							Console.WriteLine("Invalid input. Please input a brightness between 0 and 2");
-						}
-					}
-
-					processor.Brighten(brightness);
+					
 
 					Console.WriteLine("Saturation succeeded.");
 				}
@@ -143,7 +140,6 @@ namespace Project1
 					Console.WriteLine("Quitting...");
 				}
 			}
-
 
 			processor.Exit();
         }
