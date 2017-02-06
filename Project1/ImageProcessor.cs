@@ -202,9 +202,10 @@ namespace Project1
 				if (newValue < 0) newValue = 0;
 				if (newValue > 255) newValue = 255;
 				newImgColor[i].R = (byte)newValue;
+				
 			}
 
-			newImage.SetData<Color>(oldImgColor);
+			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
 		}
 
