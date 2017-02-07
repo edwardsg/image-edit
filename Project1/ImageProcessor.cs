@@ -191,9 +191,9 @@ namespace Project1
 
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
-				int r = clamp((int)(oldImgColor[i].R * contrast + contrast * -128 + 128));
-				int g = clamp((int)(oldImgColor[i].G * contrast + contrast * -128 + 128));
-				int b = clamp((int)(oldImgColor[i].B * contrast + contrast * -128 + 128));
+				int r = clamp255((int)(oldImgColor[i].R * contrast + contrast * -128 + 128));
+				int g = clamp255((int)(oldImgColor[i].G * contrast + contrast * -128 + 128));
+				int b = clamp255((int)(oldImgColor[i].B * contrast + contrast * -128 + 128));
 				newImgColor[i] = new Color(r, g, b);
 			}
 
@@ -211,19 +211,35 @@ namespace Project1
 
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
-				int r = clamp((int)(oldImgColor[i].R * brightness));
-				int g = clamp((int)(oldImgColor[i].G * brightness));
-				int b = clamp((int)(oldImgColor[i].B * brightness));
+				int r = clamp255((int)(oldImgColor[i].R * brightness));
+				int g = clamp255((int)(oldImgColor[i].G * brightness));
+				int b = clamp255((int)(oldImgColor[i].B * brightness));
 				newImgColor[i] = new Color(r, g, b);
 			}
 
 			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
 		}
-
-		public void Saturate()
+		
+		public void Saturate(double factor)
 		{
+			Color[] oldImgColor = new Color[image.Width * image.Height];
+			image.GetData<Color>(oldImgColor);
 
+			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
+			Color[] newImgColor = new Color[image.Width * image.Height];
+
+			for (int i = 0; i < image.Width * image.Height; i++)
+			{
+				ColorHSV hsv = new ColorHSV(oldImgColor[i].R, oldImgColor[i].G, oldImgColor[i].B);
+
+				hsv.Saturation *= factor;
+
+				newImgColor[i] = hsv.toRGB();
+			}
+
+			newImage.SetData<Color>(newImgColor);
+			replacement = newImage;
 		}
 
 		public void Blur()
@@ -246,11 +262,107 @@ namespace Project1
 
 		}
 
-		int clamp(int value)
+		private int clamp255(int value)
 		{
 			if (value < 0) return 0;
 			else if (value > 255) return 255;
 			else return value;
+		}
+		private class ColorHSV
+		{
+			private double hue;
+			private double saturation;
+			private double value;
+
+			public double Hue
+			{
+				get { return hue; }
+				set { hue = value; }
+			}
+
+			public double Saturation
+			{
+				get { return saturation; }
+				set { saturation = clamp1(value); }
+			}
+
+			public double Value
+			{
+				get { return value; }
+				set { this.value = clamp1(value); }
+			}
+
+			public ColorHSV(int red, int green, int blue)
+			{
+				double r = red / 255.0;
+				double g = green / 255.0;
+				double b = blue / 255.0;
+
+				double max = Math.Max(r, Math.Max(g, b));
+				double min = Math.Min(r, Math.Min(g, b));
+				double c = max - min;
+
+				double h;
+				if (c != 0)
+				{
+					if (max == r)
+						h = ((g - b) / c) % 6;
+					else if (max == g)
+						h = ((b - r) / c) + 2;
+					else
+						h = ((r - g) / c) + 4;
+				}
+				else
+					h = 0;
+
+				hue = h * 60;
+				saturation = c != 0 ? c / max : 0;
+				value = max;
+			}
+
+			public Color toRGB()
+			{
+				double c = value * saturation;
+				double h = hue / 60;
+				double x = c * (1 - Math.Abs(h % 2 - 1));
+
+				double r, g, b;
+				if (h < 1)
+				{
+					r = c; g = x; b = 0;
+				}
+				else if (h < 2)
+				{
+					r = x; g = c; b = 0;
+				}
+				else if (h < 3)
+				{
+					r = 0; g = c; b = x;
+				}
+				else if (h < 4)
+				{
+					r = 0; g = x; b = c;
+				}
+				else if (h < 5)
+				{
+					r = x; g = 0; b = c;
+				}
+				else
+				{
+					r = c; g = 0; b = x;
+				}
+
+				double m = value - c;
+
+				return new Color((int)Math.Round(r + m) * 255, (int)Math.Round(g + m) * 255, (int)Math.Round(b + m))* 255;
+			}
+
+			private double clamp1(double value)
+			{
+				if (value < 0) return 0;
+				else if (value > 1) return 1;
+				else return value;
+			}
 		}
 	}
 }

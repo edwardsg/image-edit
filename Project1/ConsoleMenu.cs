@@ -84,14 +84,25 @@ namespace Project1
 						}
 					} while (brightness < 0);
 
-						processor.Brighten(brightness);
+					processor.Brighten(brightness);
 
 					Console.WriteLine("Brightness succeeded.");
 				}
 
 				if (command.Equals("4"))
 				{
-					
+					double saturation;
+					do
+					{
+						Console.Write("Enter saturation change: ");
+						saturation = double.Parse(Console.ReadLine());
+						if (saturation < 0)
+						{
+							Console.WriteLine("Invalid input. Please input a saturation greater than 0");
+						}
+					} while (saturation < 0);
+
+					processor.Saturate(saturation);
 
 					Console.WriteLine("Saturation succeeded.");
 				}
