@@ -16,15 +16,17 @@ namespace Project1
         static void Main()
         {
 			ConsoleMenu menu = new ConsoleMenu();
-			ImageProcessor processor = new ImageProcessor();
+			ImageProcessor processor = new ImageProcessor(); // Game class
 
+			// Get image file name from user and give to image processor
 			Console.Write("Enter file name: ");
-
 			string fileName = Console.ReadLine();
 			processor.FileName = fileName;
 
+			// Give console access to image processor
 			menu.Processor = processor;
 
+			// Give menu and processing separate threads
 			Thread consoleThread = new Thread(new ThreadStart(menu.ShowMenu));
 			Thread processorThread = new Thread(new ThreadStart(processor.Run));
 

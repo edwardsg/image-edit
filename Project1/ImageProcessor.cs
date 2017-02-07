@@ -52,10 +52,12 @@ namespace Project1
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
+			// Load image from user-defined file name
 			Stream fileStream = new FileStream(fileName, FileMode.Open);
 			image = Texture2D.FromStream(GraphicsDevice, fileStream);
 			fileStream.Dispose();
 
+			// Set window size
 			graphics.PreferredBackBufferWidth = image.Width;
 			graphics.PreferredBackBufferHeight = image.Height;
 			graphics.ApplyChanges();
@@ -80,6 +82,7 @@ namespace Project1
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
 				Exit();
 
+			// Update image if there is a new image to show
 			if (replacement != null)
 			{
 				image.Dispose();
@@ -100,6 +103,7 @@ namespace Project1
 
 			spriteBatch.Begin();
 
+			// Draw image
 			spriteBatch.Draw(image, new Vector2(0, 0), Color.White);
 
 			spriteBatch.End();
@@ -221,30 +225,101 @@ namespace Project1
 			replacement = newImage;
 		}
 		
+		// Multiplies saturation of image by a factor
 		public void Saturate(double factor)
 		{
+			// Create color data array
 			Color[] oldImgColor = new Color[image.Width * image.Height];
 			image.GetData<Color>(oldImgColor);
 
+			// Prepare new image
 			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
 			Color[] newImgColor = new Color[image.Width * image.Height];
 
+			// Look at each pixel in image
 			for (int i = 0; i < image.Width * image.Height; i++)
 			{
-				ColorHSV hsv = new ColorHSV(oldImgColor[i].R, oldImgColor[i].G, oldImgColor[i].B);
+				ColorHSV hsv = new ColorHSV(oldImgColor[i].R, oldImgColor[i].G, oldImgColor[i].B);	// Convert to HSV
 
-				hsv.Saturation *= factor;
+				hsv.Saturation *= factor;	// Scale saturation
 
-				newImgColor[i] = hsv.toRGB();
+				newImgColor[i] = hsv.toRGB();	// Convert back to RGB and insert into new image
 			}
 
+			// Put new image data into temporary image buffer
 			newImage.SetData<Color>(newImgColor);
 			replacement = newImage;
 		}
 
+		// Blur image with 3x3 convolution filter
 		public void Blur()
 		{
+			// Create color data array
+			Color[] oldImgColor = new Color[image.Width * image.Height];
+			image.GetData<Color>(oldImgColor);
 
+			// Prepare new image
+			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
+			Color[] newImgColor = new Color[image.Width * image.Height];
+
+			// 3x3 kernel to blur each pixel
+			int[,] blurKernel = new int[3, 3] { { 1, 2, 1 },
+												{ 2, 4, 2 },
+												{ 1, 2, 1 } };
+
+			// Loop through each row and column of image
+			for (int i = 0; i < image.Height; ++i)
+			{
+				for (int j = 0; j < image.Width; ++j)
+				{
+					// Exclude edge pixels
+					if (i == 0 || j == 0 || i == image.Height - 1 || j == image.Width - 1)
+						newImgColor[j + i * image.Width] = oldImgColor[j + i * image.Width];
+					else
+					{
+						// Create array containing values of 3x3 area surrounding current pixel
+						Color[,] colorData = new Color[3, 3];
+						for (int y = -1; y <= 1; ++y)
+							for (int x = -1; x <= 1; ++x)
+								colorData[x + 1, y + 1] = oldImgColor[j + x + (i + y) * image.Width];
+						
+						// Find new color
+						newImgColor[j + i * image.Width] = applyKernel(oldImgColor[j + i * image.Width], colorData, blurKernel, 16);
+					}
+				}
+			}
+
+			// Put new image data into temporary image buffer
+			newImage.SetData<Color>(newImgColor);
+			replacement = newImage;
+		}
+
+		// Applies any 3x3 convolution filter kernel to a single pixel, colorData is 3x3 array surrounding current pixel
+		private Color applyKernel(Color current, Color[,] colorData, int[,] weights, int normalValue)
+		{
+			// Find weighted sum for each color component
+			int sumR = 0, sumG = 0, sumB = 0;
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					sumR += colorData[i, j].R * weights[i, j];
+					sumG += colorData[i, j].G * weights[i, j];
+					sumB += colorData[i, j].B * weights[i, j];
+				}
+			}
+
+			// Divide by normalizing value; 0 means no normalization
+			int avgR, avgG, avgB;
+			if (normalValue != 0)
+			{
+				avgR = clamp255(sumR / normalValue);
+				avgG = clamp255(sumG / normalValue);
+				avgB = clamp255(sumB / normalValue);
+				return new Color(avgR, avgG, avgB);
+			}
+			else
+				return new Color(sumR, sumG, sumB);
 		}
 
 		public void Sharpen()
@@ -262,6 +337,7 @@ namespace Project1
 
 		}
 
+		// Limits any int value to between 0 and 255
 		private int clamp255(int value)
 		{
 			if (value < 0) return 0;
@@ -269,12 +345,15 @@ namespace Project1
 			else return value;
 		}
 
+		// Helper class for HSV conversions, allows for future HSV manipulations
 		private class ColorHSV
 		{
-			private double hue;
-			private double saturation;
-			private double value;
+			// Color components
+			private double hue;			// Angle in degrees
+			private double saturation;	// Between 0 and 1
+			private double value;		// Between 0 and 1
 
+			// Getters and setters, clamping values as they arrive
 			public double Hue
 			{
 				get { return hue; }
@@ -293,12 +372,15 @@ namespace Project1
 				set { this.value = clamp1(value); }
 			}
 
+			// Creates new HSV color object from RGB components
 			public ColorHSV(int red, int green, int blue)
 			{
+				// Shrink R, G, B to between 0 and 1
 				double r = red / 255.0;
 				double g = green / 255.0;
 				double b = blue / 255.0;
 
+				// Cool math \../
 				double max = Math.Max(r, Math.Max(g, b));
 				double min = Math.Min(r, Math.Min(g, b));
 				double c = max - min;
@@ -321,8 +403,10 @@ namespace Project1
 				value = max;
 			}
 
+			// Returns color of this object converted to RGB space
 			public Color toRGB()
 			{
+				// Yeah
 				double c = value * saturation;
 				double h = hue / 60;
 				double x = c * (1 - Math.Abs(h % 2 - 1));
@@ -355,6 +439,7 @@ namespace Project1
 
 				double m = value - c;
 
+				// Scale [0, 1] up to [0, 255] int
 				int newR = (int)Math.Round((r + m) * 255);
 				int newG = (int)Math.Round((g + m) * 255);
 				int newB = (int)Math.Round((b + m) * 255);
@@ -362,6 +447,7 @@ namespace Project1
 				return new Color(newR, newG, newB);
 			}
 
+			// Limits any double to between 0 and 1
 			private double clamp1(double value)
 			{
 				if (value < 0) return 0;

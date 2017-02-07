@@ -109,8 +109,7 @@ namespace Project1
 
 				if (command.Equals("5"))
 				{
-
-
+					processor.Blur();
 
 					Console.WriteLine("Blur succeeded.");
 				}
