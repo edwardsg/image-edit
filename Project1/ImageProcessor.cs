@@ -268,6 +268,7 @@ namespace Project1
 			else if (value > 255) return 255;
 			else return value;
 		}
+
 		private class ColorHSV
 		{
 			private double hue;
@@ -354,7 +355,11 @@ namespace Project1
 
 				double m = value - c;
 
-				return new Color((int)Math.Round(r + m) * 255, (int)Math.Round(g + m) * 255, (int)Math.Round(b + m))* 255;
+				int newR = (int)Math.Round((r + m) * 255);
+				int newG = (int)Math.Round((g + m) * 255);
+				int newB = (int)Math.Round((b + m) * 255);
+
+				return new Color(newR, newG, newB);
 			}
 
 			private double clamp1(double value)
