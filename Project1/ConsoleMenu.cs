@@ -21,8 +21,6 @@ namespace Project1
 		
         public void ShowMenu()
         {
-			
-
 			string command = "";
 
 			while (!command.Equals("9"))
@@ -75,36 +73,43 @@ namespace Project1
 
 				if (command.Equals("3"))
 				{
-					Console.Write("Enter brightness change: ");
-					double brightness = double.Parse(Console.ReadLine());
+					double brightness;
+					do
+					{
+						Console.Write("Enter brightness change: ");
+						brightness = double.Parse(Console.ReadLine());
+						if (brightness < 0)
+						{
+							Console.WriteLine("Invalid input. Please input a brightness greater than 0");
+						}
+					} while (brightness < 0);
 
-
+					processor.Brighten(brightness);
 
 					Console.WriteLine("Brightness succeeded.");
 				}
 
 				if (command.Equals("4"))
 				{
-					double brightness = 3;
-					while (brightness < 0 || brightness > 2)
+					double saturation;
+					do
 					{
-						Console.Write("Enter contrast change: ");
-						brightness = double.Parse(Console.ReadLine());
-						if (brightness < 0 || brightness > 2)
+						Console.Write("Enter saturation change: ");
+						saturation = double.Parse(Console.ReadLine());
+						if (saturation < 0)
 						{
-							Console.WriteLine("Invalid input. Please input a brightness between 0 and 2");
+							Console.WriteLine("Invalid input. Please input a saturation greater than 0");
 						}
-					}
+					} while (saturation < 0);
 
-					processor.Brighten(brightness);
+					processor.Saturate(saturation);
 
 					Console.WriteLine("Saturation succeeded.");
 				}
 
 				if (command.Equals("5"))
 				{
-
-
+					processor.Blur();
 
 					Console.WriteLine("Blur succeeded.");
 				}
@@ -143,7 +148,6 @@ namespace Project1
 					Console.WriteLine("Quitting...");
 				}
 			}
-
 
 			processor.Exit();
         }
