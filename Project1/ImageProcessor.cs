@@ -116,10 +116,11 @@ namespace Project1
 		{
 			//These 4 variables are the 4 pixels around the column/row specified. Floor is used to round down (get the left/upper pixels) and Ceiling is used to round up (get the right/lower pixels)
 			//In the case of receiving 5.2,8.4 , c1r1 will be pixel 5,8 , c1r2 will be 5,9 , c2r1 will be 6,8 , c2r2 will be 6,9
-			int c1r1 = (int)((Math.Floor(col)) + (Math.Floor(row) * image.Width));
-			int c1r2 = (int)((Math.Floor(col)) + (Math.Ceiling(row) * image.Width));
-			int c2r1 = (int)((Math.Ceiling(col)) + (Math.Floor(row) * image.Width));
-			int c2r2 = (int)((Math.Ceiling(col)) + (Math.Ceiling(row) * image.Width));
+			// Clamps to edges of image
+			int c1r1 = (int)(Math.Floor(col) + Math.Floor(row) * image.Width);
+			int c1r2 = (int)(Math.Floor(col) + Math.Min(Math.Ceiling(row), image.Height - 1) * image.Width);
+			int c2r1 = (int)(Math.Min(Math.Ceiling(col), image.Width - 1) + Math.Floor(row) * image.Width);
+			int c2r2 = (int)(Math.Min(Math.Ceiling(col), image.Width - 1) + Math.Min(Math.Ceiling(row), image.Height - 1) * image.Width);
 
 			//The addition of these shortcuts to each of the 4 pixels surrounding the desired location in the oldImgColor array also allows checking
 			//to ensure that none of them reference a value outside of bounds of the oldImgColor array (in accordance with the dimensions of the texture image).
@@ -167,8 +168,9 @@ namespace Project1
 			Texture2D newImage = new Texture2D(GraphicsDevice, width, height);
 			Color[] newImgColor = new Color[width * height];
 
-			double colRatio = image.Width / width;
-			double rowRatio = image.Height / height;
+			double colRatio = (double) image.Width / width;
+			double rowRatio = (double) image.Height / height;
+
 			for (int row = 0; row < height; row++)
 			{
 				for (int col = 0; col < width; col++)
@@ -251,6 +253,34 @@ namespace Project1
 			replacement = newImage;
 		}
 
+		// Applies any 3x3 convolution filter kernel to a single pixel, colorData is 3x3 array surrounding current pixel
+		private Color applyKernel(Color current, Color[,] colorData, int[,] weights, int normalValue)
+		{
+			// Find weighted sum for each color component
+			int sumR = 0, sumG = 0, sumB = 0;
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					sumR += colorData[i, j].R * weights[i, j];
+					sumG += colorData[i, j].G * weights[i, j];
+					sumB += colorData[i, j].B * weights[i, j];
+				}
+			}
+
+			// Divide by normalizing value; 0 means no normalization
+			int avgR, avgG, avgB;
+			if (normalValue != 0)
+			{
+				avgR = clamp255(sumR / normalValue);
+				avgG = clamp255(sumG / normalValue);
+				avgB = clamp255(sumB / normalValue);
+				return new Color(avgR, avgG, avgB);
+			}
+			else
+				return new Color(sumR, sumG, sumB);
+		}
+
 		// Blur image with 3x3 convolution filter
 		public void Blur()
 		{
@@ -294,145 +324,47 @@ namespace Project1
 			replacement = newImage;
 		}
 
-		// Applies any 3x3 convolution filter kernel to a single pixel, colorData is 3x3 array surrounding current pixel
-		private Color applyKernel(Color current, Color[,] colorData, int[,] weights, int normalValue)
-		{
-			// Find weighted sum for each color component
-			int sumR = 0, sumG = 0, sumB = 0;
-			for (int i = 0; i < 3; ++i)
-			{
-				for (int j = 0; j < 3; ++j)
-				{
-					sumR += colorData[i, j].R * weights[i, j];
-					sumG += colorData[i, j].G * weights[i, j];
-					sumB += colorData[i, j].B * weights[i, j];
-				}
-			}
-
-			// Divide by normalizing value; 0 means no normalization
-			int avgR, avgG, avgB;
-			if (normalValue != 0)
-			{
-				avgR = clamp255(sumR / normalValue);
-				avgG = clamp255(sumG / normalValue);
-				avgB = clamp255(sumB / normalValue);
-				return new Color(avgR, avgG, avgB);
-			}
-			else
-				return new Color(sumR, sumG, sumB);
-		}
-
 		public void Sharpen()
 		{
-            // Create color data array
-            Color[] oldImgColor = new Color[image.Width * image.Height];
-            image.GetData<Color>(oldImgColor);
+			Color[] oldImgColor = new Color[image.Width * image.Height];
+			image.GetData<Color>(oldImgColor);
 
-            // Prepare new image
-            Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
-            Color[] newImgColor = new Color[image.Width * image.Height];
+			Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
+			Color[] newImgColor = new Color[image.Width * image.Height];
 
-            // 3x3 kernel to Sharpen each pixel
-            int[,] blurKernel = new int[3, 3] { { 0, -1, 0 },
-                                                { -1, 5, -1 },
-                                                { 0, -1, 0 } };
+			int[,] sharpenKernel = new int[3, 3] { { 0, -1, 0 },
+												   { -1, 5, -1 },
+												   { 0, -1, 0 } };
 
-            // Loop through each row and column of image
-            for (int i = 0; i < image.Height; ++i)
-            {
-                for (int j = 0; j < image.Width; ++j)
-                {
-                    // Exclude edge pixels
-                    if (i == 0 || j == 0 || i == image.Height - 1 || j == image.Width - 1)
-                        newImgColor[j + i * image.Width] = oldImgColor[j + i * image.Width];
-                    else
-                    {
-                        // Create array containing values of 3x3 area surrounding current pixel
-                        Color[,] colorData = new Color[3, 3];
-                        for (int y = -1; y <= 1; ++y)
-                            for (int x = -1; x <= 1; ++x)
-                                colorData[x + 1, y + 1] = oldImgColor[j + x + (i + y) * image.Width];
+			// Loop through each row and column of image
+			for (int i = 0; i < image.Height; ++i)
+			{
+				for (int j = 0; j < image.Width; ++j)
+				{
+					// Exclude edge pixels
+					if (i == 0 || j == 0 || i == image.Height - 1 || j == image.Width - 1)
+						newImgColor[j + i * image.Width] = oldImgColor[j + i * image.Width];
+					else
+					{
+						// Create array containing values of 3x3 area surrounding current pixel
+						Color[,] colorData = new Color[3, 3];
+						for (int y = -1; y <= 1; ++y)
+							for (int x = -1; x <= 1; ++x)
+								colorData[x + 1, y + 1] = oldImgColor[j + x + (i + y) * image.Width];
 
-                        // Find new color
-                        newImgColor[j + i * image.Width] = applyKernel(oldImgColor[j + i * image.Width], colorData, blurKernel, 0);
-                    }
-                }
-            }
-
-            // Put new image data into temporary image buffer
-            newImage.SetData<Color>(newImgColor);
-            replacement = newImage;
-        }
+						// Find new color
+						newImgColor[j + i * image.Width] = applyKernel(oldImgColor[j + i * image.Width], colorData, sharpenKernel, 1);
+					}
+				}
+			}
+		}
 
 		public void DetectEdge()
 		{
-            // Create color data array
-            Color[] oldImgColor = new Color[image.Width * image.Height];
-            image.GetData<Color>(oldImgColor);
 
-            // Prepare new image
-            Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
-            Color[] newImgColor = new Color[image.Width * image.Height];
+		}
 
-            // 3x3 kernel to detect edges
-            int[,] blurKernel = new int[3, 3] { { -1, -1, -1 },
-                                                { -1, 8, -1 },
-                                                { -1, -1, -1 } };
-
-            // Loop through each row and column of image
-            for (int i = 0; i < image.Height; ++i)
-            {
-                for (int j = 0; j < image.Width; ++j)
-                {
-                    // Exclude edge pixels
-                    if (i == 0 || j == 0 || i == image.Height - 1 || j == image.Width - 1)
-                        newImgColor[j + i * image.Width] = oldImgColor[j + i * image.Width];
-                    else
-                    {
-                        // Create array containing values of 3x3 area surrounding current pixel
-                        Color[,] colorData = new Color[3, 3];
-                        for (int y = -1; y <= 1; ++y)
-                            for (int x = -1; x <= 1; ++x)
-                                colorData[x + 1, y + 1] = oldImgColor[j + x + (i + y) * image.Width];
-
-                        // Find new color
-                        newImgColor[j + i * image.Width] = applyEdgeKernel(oldImgColor[j + i * image.Width], colorData, blurKernel, 0);
-                    }
-                }
-            }
-
-            // Put new image data into temporary image buffer
-            newImage.SetData<Color>(newImgColor);
-            replacement = newImage;
-        }
-
-
-        private Color applyEdgeKernel(Color current, Color[,] colorData, int[,] weights, int normalValue)
-        {
-            // Find weighted sum for each color component
-            int sumR = 0, sumG = 0, sumB = 0;
-            for (int i = 0; i < 3; ++i)
-            {
-                for (int j = 0; j < 3; ++j)
-                {
-                    sumR += colorData[i, j].R * weights[i, j];
-                    sumG += colorData[i, j].G * weights[i, j];
-                    sumB += colorData[i, j].B * weights[i, j];
-                }
-            }
-
-            // Divide by normalizing value; 0 means no normalization
-            int avgR, avgG, avgB;
-            avgR = clamp255(sumR+128);
-            avgG = clamp255(sumG+128);
-            avgB = clamp255(sumB+128);
-            return new Color(avgR, avgG, avgB);
-        }
-
-
-
-
-        public void Save()
+		public void Save(String saveName)
 		{
 
 		}
