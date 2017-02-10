@@ -116,10 +116,11 @@ namespace Project1
 		{
 			//These 4 variables are the 4 pixels around the column/row specified. Floor is used to round down (get the left/upper pixels) and Ceiling is used to round up (get the right/lower pixels)
 			//In the case of receiving 5.2,8.4 , c1r1 will be pixel 5,8 , c1r2 will be 5,9 , c2r1 will be 6,8 , c2r2 will be 6,9
-			int c1r1 = (int)((Math.Floor(col)) + (Math.Floor(row) * image.Width));
-			int c1r2 = (int)((Math.Floor(col)) + (Math.Ceiling(row) * image.Width));
-			int c2r1 = (int)((Math.Ceiling(col)) + (Math.Floor(row) * image.Width));
-			int c2r2 = (int)((Math.Ceiling(col)) + (Math.Ceiling(row) * image.Width));
+			// Clamps to edges of image
+			int c1r1 = (int)(Math.Floor(col) + Math.Floor(row) * image.Width);
+			int c1r2 = (int)(Math.Floor(col) + Math.Min(Math.Ceiling(row), image.Height - 1) * image.Width);
+			int c2r1 = (int)(Math.Min(Math.Ceiling(col), image.Width - 1) + Math.Floor(row) * image.Width);
+			int c2r2 = (int)(Math.Min(Math.Ceiling(col), image.Width - 1) + Math.Min(Math.Ceiling(row), image.Height - 1) * image.Width);
 
 			//The addition of these shortcuts to each of the 4 pixels surrounding the desired location in the oldImgColor array also allows checking
 			//to ensure that none of them reference a value outside of bounds of the oldImgColor array (in accordance with the dimensions of the texture image).
@@ -167,8 +168,9 @@ namespace Project1
 			Texture2D newImage = new Texture2D(GraphicsDevice, width, height);
 			Color[] newImgColor = new Color[width * height];
 
-			double colRatio = image.Width / width;
-			double rowRatio = image.Height / height;
+			double colRatio = (double) image.Width / width;
+			double rowRatio = (double) image.Height / height;
+
 			for (int row = 0; row < height; row++)
 			{
 				for (int col = 0; col < width; col++)
