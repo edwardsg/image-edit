@@ -52,8 +52,7 @@ namespace Project1
 
 					Console.WriteLine("Resize succeeded.");
 				}
-
-				if (command.Equals("2"))
+				else if (command.Equals("2"))
 				{
 					double contrast = 3;
 					while (contrast < 0 || contrast > 2)
@@ -70,8 +69,7 @@ namespace Project1
 
 					Console.WriteLine("Contrast succeeded.");
 				}
-
-				if (command.Equals("3"))
+				else if (command.Equals("3"))
 				{
 					double brightness;
 					do
@@ -88,8 +86,7 @@ namespace Project1
 
 					Console.WriteLine("Brightness succeeded.");
 				}
-
-				if (command.Equals("4"))
+				else if (command.Equals("4"))
 				{
 					double saturation;
 					do
@@ -106,45 +103,35 @@ namespace Project1
 
 					Console.WriteLine("Saturation succeeded.");
 				}
-
-				if (command.Equals("5"))
+				else if (command.Equals("5"))
 				{
 					processor.Blur();
 
 					Console.WriteLine("Blur succeeded.");
 				}
-
-				if (command.Equals("6"))
+				else if (command.Equals("6"))
 				{
-
-
+					processor.Sharpen();
 
 					Console.WriteLine("Sharpen succeeded.");
 				}
-
-				if (command.Equals("7"))
+				else if (command.Equals("7"))
 				{
-
-
+					processor.DetectEdge();
 
 					Console.WriteLine("Edge Detection succeeded.");
 				}
-
-				if (command.Equals("8"))
+				else if (command.Equals("8"))
 				{
 					Console.Write("Enter file name: ");
-					String savename = Console.ReadLine();
+					String saveName = Console.ReadLine();
 
-
+					processor.Save(saveName);
 
 					Console.WriteLine("Saving file succeeded.");
 				}
-
-				if (command.Equals("9"))
+				else if (command.Equals("9"))
 				{
-
-
-
 					Console.WriteLine("Quitting...");
 				}
 			}
