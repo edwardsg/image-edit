@@ -357,16 +357,62 @@ namespace Project1
 					}
 				}
 			}
-		}
+
+            // Put new image data into temporary image buffer
+            newImage.SetData<Color>(newImgColor);
+            replacement = newImage;
+        }
 
 		public void DetectEdge()
 		{
+            Color[] oldImgColor = new Color[image.Width * image.Height];
+            image.GetData<Color>(oldImgColor);
 
-		}
+            Texture2D newImage = new Texture2D(GraphicsDevice, image.Width, image.Height);
+            Color[] newImgColor = new Color[image.Width * image.Height];
 
+            int[,] sharpenKernel = new int[3, 3] { { 0, -1, 0 },
+                                                   { -1, 5, -1 },
+                                                   { 0, -1, 0 } };
+
+            // Loop through each row and column of image
+            for (int i = 0; i < image.Height; ++i)
+            {
+                for (int j = 0; j < image.Width; ++j)
+                {
+                    // Exclude edge pixels
+                    if (i == 0 || j == 0 || i == image.Height - 1 || j == image.Width - 1)
+                        newImgColor[j + i * image.Width] = oldImgColor[j + i * image.Width];
+                    else
+                    {
+                        // Create array containing values of 3x3 area surrounding current pixel
+                        Color[,] colorData = new Color[3, 3];
+                        for (int y = -1; y <= 1; ++y)
+                            for (int x = -1; x <= 1; ++x)
+                                colorData[x + 1, y + 1] = oldImgColor[j + x + (i + y) * image.Width];
+
+                        // Find new color
+                        newImgColor[j + i * image.Width] = applyKernel(oldImgColor[j + i * image.Width], colorData, sharpenKernel, 1);
+
+                        //Bias by +128 and clamp to 255
+                        newImgColor[j+i*image.Width].R = (byte)clamp255(newImgColor[j + i * image.Width].R + 128);
+                        newImgColor[j + i * image.Width].G = (byte)clamp255(newImgColor[j + i * image.Width].G + 128);
+                        newImgColor[j + i * image.Width].B = (byte)clamp255(newImgColor[j + i * image.Width].B + 128);
+
+                    }
+                }
+            }
+
+            // Put new image data into temporary image buffer
+            newImage.SetData<Color>(newImgColor);
+            replacement = newImage;
+        }
+    
+        //Save the current image data to a file under the a specified name (in Content folder)
 		public void Save(String saveName)
 		{
-
+            Stream fileStream = new FileStream(saveName, FileMode.Create);
+            image.SaveAsPng(fileStream, image.Width, image.Height);
 		}
 
 		// Limits any int value to between 0 and 255
