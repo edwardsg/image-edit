@@ -19,6 +19,7 @@ namespace Project1
 			}
 		}
 		
+		// Create text menu in console, accepts commands between 1 and 9
         public void ShowMenu()
         {
 			string command = "";
